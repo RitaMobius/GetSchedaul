@@ -7,7 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		F307C6C92D63844200ADA7B3 /* libboost_program_options.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F307C6C82D63844200ADA7B3 /* libboost_program_options.a */; };
 		F36EB9F92D5F4FB500313D36 /* EventKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F36EB9F82D5F4FB500313D36 /* EventKit.framework */; };
+		F3FD6C0A2D62403E00328B12 /* libboost_json.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = F3FD6C082D62403E00328B12 /* libboost_json.dylib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -23,8 +25,11 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		F307C6C82D63844200ADA7B3 /* libboost_program_options.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libboost_program_options.a; path = ../../../../../opt/homebrew/Cellar/boost/1.87.0/lib/libboost_program_options.a; sourceTree = "<group>"; };
 		F36EB9EB2D5F31A300313D36 /* objectiveoop */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = objectiveoop; sourceTree = BUILT_PRODUCTS_DIR; };
 		F36EB9F82D5F4FB500313D36 /* EventKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = EventKit.framework; path = System/Library/Frameworks/EventKit.framework; sourceTree = SDKROOT; };
+		F3FD6C082D62403E00328B12 /* libboost_json.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libboost_json.dylib; path = ../../../../../opt/homebrew/Cellar/boost/1.87.0/lib/libboost_json.dylib; sourceTree = "<group>"; };
+		F3FD6C092D62403E00328B12 /* libboost_json.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libboost_json.a; path = ../../../../../opt/homebrew/Cellar/boost/1.87.0/lib/libboost_json.a; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -40,6 +45,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F307C6C92D63844200ADA7B3 /* libboost_program_options.a in Frameworks */,
+				F3FD6C0A2D62403E00328B12 /* libboost_json.dylib in Frameworks */,
 				F36EB9F92D5F4FB500313D36 /* EventKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -67,6 +74,9 @@
 		F36EB9F72D5F4FB500313D36 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				F307C6C82D63844200ADA7B3 /* libboost_program_options.a */,
+				F3FD6C092D62403E00328B12 /* libboost_json.a */,
+				F3FD6C082D62403E00328B12 /* libboost_json.dylib */,
 				F36EB9F82D5F4FB500313D36 /* EventKit.framework */,
 			);
 			name = Frameworks;
@@ -198,6 +208,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 15.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
+				NEW_SETTING = "";
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx15.2;
 			};
@@ -253,6 +264,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 15.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
+				NEW_SETTING = "";
 				SDKROOT = macosx15.2;
 			};
 			name = Release;
@@ -262,11 +274,15 @@
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
+				HEADER_SEARCH_PATHS = "";
 				"HEADER_SEARCH_PATHS[arch=*]" = "";
+				LIBRARY_SEARCH_PATHS = /opt/homebrew/Cellar/boost/1.87.0/lib;
+				"LIBRARY_SEARCH_PATHS[arch=*]" = /opt/homebrew/Cellar/boost/1.87.0/lib;
 				MACOSX_DEPLOYMENT_TARGET = 14.6;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 6.0;
+				"SYSTEM_HEADER_SEARCH_PATHS[arch=*]" = /opt/homebrew/Cellar/boost/1.87.0/include/;
 			};
 			name = Debug;
 		};
@@ -275,9 +291,13 @@
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
+				HEADER_SEARCH_PATHS = "";
+				LIBRARY_SEARCH_PATHS = /opt/homebrew/Cellar/boost/1.87.0/lib;
+				"LIBRARY_SEARCH_PATHS[arch=*]" = /opt/homebrew/Cellar/boost/1.87.0/lib;
 				MACOSX_DEPLOYMENT_TARGET = 14.6;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 6.0;
+				"SYSTEM_HEADER_SEARCH_PATHS[arch=*]" = /opt/homebrew/Cellar/boost/1.87.0/include/;
 			};
 			name = Release;
 		};

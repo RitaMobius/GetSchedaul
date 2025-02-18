@@ -7,16 +7,30 @@
 
 #ifndef _SCHEDUAL_H_
 #define _SCHEDUAL_H_
-/* There is C Plus Plus hander file*/
-#include "someDef.hpp"
+
 #include <iostream>
-#include <dispatch/dispatch.h>
 #include <fstream>
 #include <string>
-
-/* There is Objective-C hander file*/
+#include <sstream>
+#include <iomanip>
+#include <chrono>
+#include <ctime>
+#include <boost/json.hpp>
+#include <dispatch/dispatch.h>
+#include "someDef.hpp"
 #import <Foundation/Foundation.h>
 #import <EventKit/EventKit.h>
+
+
+namespace SetSchedual {
+
+typedef struct {
+    std::string eventTile;
+    std::string eventStartDate;
+    std::string eventEndDate;
+    std::string eventLocation;
+    std::string deadline;
+}schedualInformation_Struct;
 
 class SCHEDUAL_ESSENTIAL Schedual {
 private:
@@ -37,12 +51,14 @@ private:
     
     NSDate* convertStringToDate(NSString* dateString, NSString* format) SCHEDUAL_NOEXCEPT;
     void addEventToCalendarWithStore(EKEventStore *eventStore, dispatch_semaphore_t semaphore) SCHEDUAL_NOEXCEPT;
-
+    
 public:
     Schedual();
     ~Schedual();
-    Schedual(NSString* eventTitle, NSString* eventStartDate, NSString* eventEndDate, NSString* eventLocation, NSString* deadline = nil) SCHEDUAL_NOEXCEPT;
+    static std::string calculateDateAfterWeeks(const std::string& startDateStr, int weeks);
+    Schedual(NSString* eventTitle, NSString* eventStartDate, NSString* eventEndDate = nil, NSString* eventLocation = nil, NSString* deadline = nil) SCHEDUAL_NOEXCEPT;
     void addEventToCalendar() SCHEDUAL_NOEXCEPT;
 };
+}
 
 #endif
