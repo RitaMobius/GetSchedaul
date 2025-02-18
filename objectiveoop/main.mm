@@ -59,7 +59,7 @@ int main(int argc, const char * argv[]) {
                 const boost::json::value jsonValue = boost::json::parse(getJson.getJsonFileContents());
                 getJson.sortJsonToSchedualMap(jsonValue);
                 std::unordered_map<std::string, boost::json::value> hashTable = getJson.getSchedualMap();
-                
+                std::unordered_map<std::string, int> jsonValueCapacity = getJson.getValueCapacity();
                 SCHEDUAL_CONSTEXPR int numThreads = NUMBER_OF_THREADS;
                 std::vector<std::thread> threads;
 
@@ -68,38 +68,38 @@ int main(int argc, const char * argv[]) {
                     threads.emplace_back(Multithreaded::ThreadPools::schedualWorkerThread);
                 }
 
-                Multithreaded::ThreadPools::addExecutionTask([&hashTable](const std::function<void()> &func) {
-                    Multithreaded::ThreadedTasks::executeWriteScheduleTask(schedualPrefix::mondayLesson, hashTable, TOTAL_NUMBER_OF_COURSES);
+                Multithreaded::ThreadPools::addExecutionTask([&hashTable,&jsonValueCapacity](const std::function<void()> &func) {
+                    Multithreaded::ThreadedTasks::executeWriteScheduleTask(schedualPrefix::mondayLesson, hashTable,jsonValueCapacity, TOTAL_NUMBER_OF_COURSES);
                     func();
                 });
                 
-                Multithreaded::ThreadPools::addExecutionTask([&hashTable](const std::function<void()> &func) {
-                    Multithreaded::ThreadedTasks::executeWriteScheduleTask(schedualPrefix::TuesdayLesson, hashTable, TOTAL_NUMBER_OF_COURSES);
+                Multithreaded::ThreadPools::addExecutionTask([&hashTable,&jsonValueCapacity](const std::function<void()> &func) {
+                    Multithreaded::ThreadedTasks::executeWriteScheduleTask(schedualPrefix::TuesdayLesson, hashTable, jsonValueCapacity, TOTAL_NUMBER_OF_COURSES);
                     func();
                 });
                 
-                Multithreaded::ThreadPools::addExecutionTask([&hashTable](const std::function<void()> &func) {
-                    Multithreaded::ThreadedTasks::executeWriteScheduleTask(schedualPrefix::WednesdayLesson, hashTable, TOTAL_NUMBER_OF_COURSES);
+                Multithreaded::ThreadPools::addExecutionTask([&hashTable,&jsonValueCapacity](const std::function<void()> &func) {
+                    Multithreaded::ThreadedTasks::executeWriteScheduleTask(schedualPrefix::WednesdayLesson, hashTable, jsonValueCapacity,TOTAL_NUMBER_OF_COURSES);
                     func();
                 });
                 
-                Multithreaded::ThreadPools::addExecutionTask([&hashTable](const std::function<void()> &func) {
-                    Multithreaded::ThreadedTasks::executeWriteScheduleTask(schedualPrefix::ThursdayLesson, hashTable, TOTAL_NUMBER_OF_COURSES);
+                Multithreaded::ThreadPools::addExecutionTask([&hashTable,&jsonValueCapacity](const std::function<void()> &func) {
+                    Multithreaded::ThreadedTasks::executeWriteScheduleTask(schedualPrefix::ThursdayLesson, hashTable, jsonValueCapacity,TOTAL_NUMBER_OF_COURSES);
                     func();
                 });
                 
-                Multithreaded::ThreadPools::addExecutionTask([&hashTable](const std::function<void()> &func) {
-                    Multithreaded::ThreadedTasks::executeWriteScheduleTask(schedualPrefix::FridayLesson, hashTable, TOTAL_NUMBER_OF_COURSES);
+                Multithreaded::ThreadPools::addExecutionTask([&hashTable,&jsonValueCapacity](const std::function<void()> &func) {
+                    Multithreaded::ThreadedTasks::executeWriteScheduleTask(schedualPrefix::FridayLesson, hashTable, jsonValueCapacity,TOTAL_NUMBER_OF_COURSES);
                     func();
                 });
                 
-                Multithreaded::ThreadPools::addExecutionTask([&hashTable](const std::function<void()> &func) {
-                    Multithreaded::ThreadedTasks::executeWriteScheduleTask(schedualPrefix::SaturdayLesson, hashTable, TOTAL_NUMBER_OF_COURSES);
+                Multithreaded::ThreadPools::addExecutionTask([&hashTable,&jsonValueCapacity](const std::function<void()> &func) {
+                    Multithreaded::ThreadedTasks::executeWriteScheduleTask(schedualPrefix::SaturdayLesson, hashTable, jsonValueCapacity,TOTAL_NUMBER_OF_COURSES);
                     func();
                 });
                 
-                Multithreaded::ThreadPools::addExecutionTask([&hashTable](const std::function<void()> &func) {
-                    Multithreaded::ThreadedTasks::executeWriteScheduleTask(schedualPrefix::SundayLesson, hashTable, TOTAL_NUMBER_OF_COURSES);
+                Multithreaded::ThreadPools::addExecutionTask([&hashTable,&jsonValueCapacity](const std::function<void()> &func) {
+                    Multithreaded::ThreadedTasks::executeWriteScheduleTask(schedualPrefix::SundayLesson, hashTable, jsonValueCapacity,TOTAL_NUMBER_OF_COURSES);
                     func();
                 });
                 Multithreaded::ThreadPools::stopPool();
