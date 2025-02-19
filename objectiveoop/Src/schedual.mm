@@ -1,9 +1,10 @@
-//
-//  schedualCPP.mm
-//  objectiveoop
-//
-//  Created by Kianna on 2025/2/15.
-//
+/**
+ *@file schedual.mm    定义schedual.hpp文件中定义的函数。
+ *@Date 创建时间2025/2/15    最后修改时间2025/2/19
+ *@author Dengjizhang  catrinadk@outlook.com
+ *
+ *@brief 该文件中定义的函数是为将事件日程信息写入MacOS系统日历中的相关方法，使用到EventKit框架。
+ */
 
 
 #include <chrono>
@@ -41,9 +42,7 @@ m_eventLocation(eventLocation), m_interval(1), m_deadline(deadline), deadlineEmp
               NSDate *date = convertStringToDate(m_deadline, @"yyyy-MM-dd");
               theEndTimeSchedual = [EKRecurrenceEnd recurrenceEndWithEndDate:date];
           }
-    
     eventStartDate_ = convertStringToDate(m_eventStartDate, @"yyyy-MM-dd HH:mm");
-    
     if (m_eventEndDate == nil) {
         eventEndDate_ = [eventStartDate_ dateByAddingTimeInterval:24 * 60 * 60];
     }
@@ -53,7 +52,7 @@ m_eventLocation(eventLocation), m_interval(1), m_deadline(deadline), deadlineEmp
           
           do {
               
-              logfile = new std::ofstream("/Users/dengjizhang/Schedual.log", std::ios::app);
+              logfile = new std::ofstream("Schedual.log", std::ios::app);
               std::cout << "文件打开成功！" << std::endl;
           } while (!logfile->is_open());
           
@@ -68,7 +67,8 @@ Schedual::~Schedual() {
     delete logfile;
     delete logBuffer;
 }
-    
+
+/**@brief 用于向系统日历中添加事件**/
 void Schedual::addEventToCalendarWithStore(EKEventStore *eventStore, dispatch_semaphore_t semaphore) SCHEDUAL_NOEXCEPT {
     EKCalendar *defaultCalendar = [eventStore defaultCalendarForNewEvents];
     if (!defaultCalendar) {

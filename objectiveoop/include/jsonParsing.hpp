@@ -36,11 +36,11 @@ public:
 
     virtual ~Json();
 
-    SCHEDUAL_NODISCARD std::string &getJsonFileContents() SCHEDUAL_NOEXCEPT;
+    SCHEDUAL_NODISCARD const std::string &getJsonFileContents() SCHEDUAL_NOEXCEPT;
 
-    SCHEDUAL_NODISCARD schedual_Map &getSchedualMap()  SCHEDUAL_NOEXCEPT;
+    SCHEDUAL_NODISCARD const schedual_Map &getSchedualMap()  SCHEDUAL_NOEXCEPT;
     
-    [[nodiscard]] const valueCapacity &getValueCapacity()  noexcept;
+    SCHEDUAL_NODISCARD const valueCapacity &getValueCapacity()  SCHEDUAL_NOEXCEPT;
 
     void sortJsonToSchedualMap(const boost::json::value &jsonValue, const std::string &parentKey = "") SCHEDUAL_NOEXCEPT;
 };

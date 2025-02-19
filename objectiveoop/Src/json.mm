@@ -1,13 +1,12 @@
-//
-//  json.mm
-//  objectiveoop
-//
-//  Created by Kianna on 2025/2/16.
-//
-
-//
-// Created by Kianna on 25-2-16.
-//
+/**
+ *
+ *@file json.mm    定json.hpp文件中定义的函数。
+ *@Date 创建时间2025/2/16    最后修改时间2025/2/18
+ *
+ *@author Dengjizhang  catrinadk@outlook.com
+ *
+ *@brief Json解析的方法定义，引用boost.json。
+ */
 
 
 #include <fstream>
@@ -18,19 +17,26 @@
 #include "../include/jsonParsing.hpp"
 
 
-std::string &schedual::Json::getJsonFileContents() SCHEDUAL_NOEXCEPT {
+/**@brief 返回Json文件内容的引用。**/
+const std::string &schedual::Json::getJsonFileContents() SCHEDUAL_NOEXCEPT {
     return jsonFileContents;
 }
 
-schedual::Json::schedual_Map &schedual::Json::getSchedualMap()  SCHEDUAL_NOEXCEPT {
+/**@brief 返回解析后简直对的存储容器引用。**/
+const schedual::Json::schedual_Map &schedual::Json::getSchedualMap()  SCHEDUAL_NOEXCEPT {
     return schedualMap;
 }
 
-const schedual::Json::valueCapacity &schedual::Json::getValueCapacity() noexcept {
+/**@brief 返回Json每一个数组的原元素个数。**/
+const schedual::Json::valueCapacity &schedual::Json::getValueCapacity() SCHEDUAL_NOEXCEPT {
     return arrayKeyValue;
 }
 
-
+/**
+ *@brief 对Json文件中的内容进行解析，通过解析，键以xxxx.xxx 的格式存储。
+ *@param jsonValue 传入Json文件的内容。
+ *@param parentKey 键的名称
+ */
 void schedual::Json::sortJsonToSchedualMap(const boost::json::value &jsonValue, const std::string &parentKey) SCHEDUAL_NOEXCEPT {
     std::stack<stackEntry_pair> stack;
     stack.emplace(jsonValue, parentKey);
@@ -67,7 +73,10 @@ void schedual::Json::sortJsonToSchedualMap(const boost::json::value &jsonValue, 
 }
 
 
-
+/**
+ *@brief Json类的构造函数
+ *@param path Json文件的地址
+ */
 schedual::Json::Json(std::string path) SCHEDUAL_NOEXCEPT : jsonFileName(std::move(path)){
     
     jsonFileOpen.open(jsonFileName);

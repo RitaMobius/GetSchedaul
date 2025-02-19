@@ -1,10 +1,18 @@
+/**
+ *
+ *@file multithreading.mm    定multithreading.hpp文件中定义的函数。
+ *@Date 创建时间2025/2/18    最后修改时间2025/2/19
+ *@author Dengjizhang  catrinadk@outlook.com
+ *
+ *@brief GetSchedual通过线程池的方式向系统日历写入日程信息的方法。
+ */
 
-//  multithreading.cpp
-//  objectiveoop
+//  
 //
-//  Created by Kianna on 2025/2/18.
+//
 
 #include <iostream>
+#include <cassert>
 #include "../include/multithreading.hpp"
 #include "../include/schedual.hpp"
 
@@ -18,13 +26,13 @@ using namespace Multithreaded;
  @size 设置Json标识数组的大小
  */
 
-void Multithreaded::ThreadedTasks::executeWriteScheduleTask(const std::string *singleDayCourseInformation, std::unordered_map<std::string, boost::json::value> &hashTable, std::unordered_map<std::string, int> &ValueCapacity, const size_t size) {
+void Multithreaded::ThreadedTasks::executeWriteScheduleTask(const std::vector<std::string> &singleDayCourseInformation, std::unordered_map<std::string, boost::json::value> &hashTable, std::unordered_map<std::string, int> &ValueCapacity) {
     int index = 0, capacity = 0;
     std::string eventDate;
      schedualInformation_Struct event = {};
-     for (int i = 0; i <= size; i++) {
+     for (const auto & i : singleDayCourseInformation) {
          while (true) {
-             std::string hashTableKey = singleDayCourseInformation[i] + "." + std::to_string(index);
+             std::string hashTableKey = i + "." + std::to_string(index);
              capacity = ValueCapacity[hashTableKey];
              if (const auto it = hashTable.find(hashTableKey); it != hashTable.end()) {
                  std::vector<std::string> scheduleInformation;
@@ -73,19 +81,41 @@ void Multithreaded::ThreadedTasks::executeWriteScheduleTask(const std::string *s
                  NSString *nsStrLocation = [[NSString alloc] initWithUTF8String:event.eventLocation.c_str()];
                  NSString *nsStrDeadLine = [[NSString alloc] initWithUTF8String:deadLine.c_str()];
                  
+                 /* 重构这里的if-elseif-else语句，这样看着很没水平*/
                  if (event.eventEndDate != "null" && event.eventLocation != "null" && event.deadline != "null") {
                      SetSchedual::Schedual targetSchedual(nsStrTile,nsStrStartDate,nsStrEndDate,nsStrLocation,nsStrDeadLine);
                      targetSchedual.addEventToCalendar();
                  }
-                 else if (event.deadline != "null" && event.eventLocation != "null") {
-                     SetSchedual::Schedual targetSchedual(nsStrTile,nsStrStartDate, nsStrEndDate, nsStrLocation,nsStrDeadLine);  // 结束时间为空
+                 else if (event.eventEndDate == "null") {
+                     if (event.eventLocation == "null") {
+                         SetSchedual::Schedual targetSchedual(nsStrTile,nsStrStartDate, nil, nil, nsStrDeadLine);
+                         targetSchedual.addEventToCalendar();
+                     }
+                     else if (event.deadline == "null") {
+                         SetSchedual::Schedual targetSchedual(nsStrTile,nsStrStartDate, nil, nsStrLocation,nil);
+                         targetSchedual.addEventToCalendar();
+                     }
+                     else {
+                         SetSchedual::Schedual targetSchedual(nsStrTile,nsStrStartDate, nil, nsStrLocation,nsStrDeadLine);
+                         targetSchedual.addEventToCalendar();
+                     }
+                 }
+                 else if (event.eventLocation == "null") {
+                     if (event.deadline == "null") {
+                         SetSchedual::Schedual targetSchedual(nsStrTile,nsStrStartDate, nsStrEndDate, nil, nil);
+                         targetSchedual.addEventToCalendar();
+                     }
+                     else {
+                         SetSchedual::Schedual targetSchedual(nsStrTile,nsStrStartDate, nsStrEndDate, nil,nsStrDeadLine);
+                         targetSchedual.addEventToCalendar();
+                     }
+                 }
+                 else if (event.deadline == "null") {
+                     SetSchedual::Schedual targetSchedual(nsStrTile,nsStrStartDate,nsStrEndDate,nsStrLocation,nil);
                      targetSchedual.addEventToCalendar();
                  }
-                 else if (event.eventLocation != "null" && event.deadline =="null") {
-                     SetSchedual::Schedual targetSchedual(nsStrTile,nsStrStartDate,nsStrEndDate,nsStrLocation);
-                 }
                  else {
-                     SetSchedual::Schedual targetSchedual(nsStrTile,nsStrStartDate);  // 结束时间、地点、截止时间为空
+                     SetSchedual::Schedual targetSchedual(nsStrTile,nsStrStartDate,nil,nil,nil);  // 结束时间、地点、截止时间为空
                      targetSchedual.addEventToCalendar();
                  }
 
@@ -99,4 +129,32 @@ void Multithreaded::ThreadedTasks::executeWriteScheduleTask(const std::string *s
              }
          }
      }
+}
+
+
+std::vector<std::vector<std::string>> Multithreaded::ThreadedTasks::splitIntoNGroups(std::vector<std::string> originalVector, const size_t n) {
+    
+    assert(n != 0 && "The number of groups cannot be zero!");
+    if (originalVector.empty()) {
+        /*如果用户配置的Json文件错误会导致无法被正则表达式匹配，这里会出现空*/
+        return {};
+    }
+
+    std::vector<std::vector<std::string>> groupedVectors(n);
+    const size_t totalSize = originalVector.size();
+    const size_t baseSize = totalSize / n;
+    const size_t remainder = totalSize % n;
+
+    for (size_t i = 0; i < n; ++i) {
+        const size_t groupSize = baseSize + (i < remainder ? 1 : 0);
+        groupedVectors[i].reserve(groupSize);
+    }
+
+    size_t groupIndex = 0;
+    for (auto & it : originalVector) {
+        groupedVectors[groupIndex].push_back(std::move(it));
+        groupIndex = (groupIndex + 1) % n;
+    }
+
+    return groupedVectors;
 }
