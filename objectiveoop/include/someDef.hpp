@@ -91,8 +91,8 @@
 #endif  // !defined(SCHEDUAL_COMMAND_HELP) && !defined(SCHEDUAL_COMMAND_P_)
 
 #if !defined(SCHEDUAL_COMMAND_VERSION) && !defined(SCHEDUAL_COMMAND_V_)  // 定义版本信息命令 -v
-    #define SCHEDUAL_COMMAND_VERSION "Version,v"
-    #define SCHEDUAL_COMMAND_V_ "Version"
+    #define SCHEDUAL_COMMAND_VERSION "version,v"
+    #define SCHEDUAL_COMMAND_V_ "version"
 #endif  // !defined(SCHEDUAL_COMMAND_VERSION) && !defined(SCHEDUAL_COMMAND_V_)
 
 #if !defined(SCHEDUAL_COMMAND_TITLE) && !defined(SCHEDUAL_COMMAND_T_)  // 定义设置日程标题命令 -t

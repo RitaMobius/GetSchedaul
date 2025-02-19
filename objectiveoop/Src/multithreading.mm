@@ -7,17 +7,12 @@
  *@brief GetSchedual通过线程池的方式向系统日历写入日程信息的方法。
  */
 
-//  
-//
-//
-
 #include <iostream>
 #include <cassert>
 #include "../include/multithreading.hpp"
 #include "../include/schedual.hpp"
 
 using namespace Multithreaded;
-
 
 /*！
  @brief 该方法用于整理解析后的Json文件信息，并根据星系配置日历日程信息，写入日历。设计的目的是用于多线程写入。
@@ -27,12 +22,12 @@ using namespace Multithreaded;
  */
 
 void Multithreaded::ThreadedTasks::executeWriteScheduleTask(const std::vector<std::string> &singleDayCourseInformation, std::unordered_map<std::string, boost::json::value> &hashTable, std::unordered_map<std::string, int> &ValueCapacity) {
-    int index = 0, capacity = 0;
-    std::string eventDate;
+    int capacity = 0;
+    std::string eventDate, hashTableKey;
      schedualInformation_Struct event = {};
+
      for (const auto & i : singleDayCourseInformation) {
-         while (true) {
-             std::string hashTableKey = i + "." + std::to_string(index);
+             hashTableKey = i;
              capacity = ValueCapacity[hashTableKey];
              if (const auto it = hashTable.find(hashTableKey); it != hashTable.end()) {
                  std::vector<std::string> scheduleInformation;
@@ -40,7 +35,7 @@ void Multithreaded::ThreadedTasks::executeWriteScheduleTask(const std::vector<st
                  for (int jsonArrayIndex = 0; jsonArrayIndex < capacity; ++jsonArrayIndex) {
                      hashTableKey.append("." + std::to_string(jsonArrayIndex));
                      if (const auto iter = hashTable.find(hashTableKey); iter != hashTable.end()) {
-                         /* 在这里定义插入需要写入日历的内容，循环的结果依次为日程标题、开始时间、结束时间、日程循环周期、地址*/
+                         /* 在这里定义插入需要写入日历的内容，循环的结果依次为日程标题、开始时间、结束时间、地址、截止时间*/
                          if (iter->second.kind() == boost::json::kind::string) {
                               eventDate = iter->second.as_string().c_str();
                              scheduleInformation.emplace_back(eventDate);
@@ -58,20 +53,20 @@ void Multithreaded::ThreadedTasks::executeWriteScheduleTask(const std::vector<st
                  /*处理完单个Json数组后执行系统日历的写入操作*/
                  for (size_t scheduleInformationIndex = 0; scheduleInformationIndex < scheduleInformation.size(); ++scheduleInformationIndex) {
                      switch (scheduleInformationIndex) {
-                         case 0: event.eventTile = scheduleInformation[scheduleInformationIndex];
-                         case 1: event.eventStartDate = scheduleInformation[scheduleInformationIndex];
-                         case 2: event.eventEndDate = scheduleInformation[scheduleInformationIndex];
-                         case 3: event.eventLocation = scheduleInformation[scheduleInformationIndex];
-                         case 4: event.deadline = scheduleInformation[scheduleInformationIndex];
-                         default: break;
+                         case 0: event.eventTile = scheduleInformation[scheduleInformationIndex]; break;
+                         case 1: event.eventStartDate = scheduleInformation[scheduleInformationIndex]; break;
+                         case 2: event.eventEndDate = scheduleInformation[scheduleInformationIndex]; break;
+                         case 3: event.eventLocation = scheduleInformation[scheduleInformationIndex];break;
+                         case 4: event.deadline = scheduleInformation[scheduleInformationIndex]; break;
+                         default:
+                             std::cout << "GetSchedual 提示：只会向日历中写入：事件标题、开始事件、结束时间、事件地点、事件截止时间，其余的选项将自动忽略！" << std::endl;
+                             break;
                      }
                  }
                  
                  std::string startDate = event.eventStartDate;
-                 
                  /*从事件开始事件2024-10-10 8:30截取前10个字符得到日期2024-10-10*/
                  startDate.substr(0,10);
-                 
                  /*通过事件开始事件计算出事件截止时间*/
                  std::string deadLine = SetSchedual::Schedual::calculateDateAfterWeeks(startDate, std::stoi(event.deadline));
                  
@@ -118,15 +113,7 @@ void Multithreaded::ThreadedTasks::executeWriteScheduleTask(const std::vector<st
                      SetSchedual::Schedual targetSchedual(nsStrTile,nsStrStartDate,nil,nil,nil);  // 结束时间、地点、截止时间为空
                      targetSchedual.addEventToCalendar();
                  }
-
-                 /*进入同一标识符下的另一个Json数组*/
                  scheduleInformation.clear();
-                 index++;
-             } else {
-                 /*上一个Json标识符处理完毕，刷新Json标识符末端的索引，并处理下一个Json标识符*/
-                 index = 0;
-                 break;
-             }
          }
      }
 }

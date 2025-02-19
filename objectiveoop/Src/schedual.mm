@@ -52,17 +52,15 @@ m_eventLocation(eventLocation), m_interval(1), m_deadline(deadline), deadlineEmp
           
           do {
               
-              logfile = new std::ofstream("Schedual.log", std::ios::app);
-              std::cout << "文件打开成功！" << std::endl;
+              logfile = new std::ofstream("schedual.log", std::ios::app);
           } while (!logfile->is_open());
           
-    logBuffer->append(GET_CURRENT_TIME() + "\tSetSchedual程序启动成功.\n");
+    logBuffer->append(GET_CURRENT_TIME() + "\tThe SetSchedual program was successfully launched.\n");
     
 }
 
 Schedual::~Schedual() {
     *logfile << *logBuffer + "\n";
-    NSLog(@"文件写入成功！");
     logfile->close();
     delete logfile;
     delete logBuffer;
@@ -72,8 +70,8 @@ Schedual::~Schedual() {
 void Schedual::addEventToCalendarWithStore(EKEventStore *eventStore, dispatch_semaphore_t semaphore) SCHEDUAL_NOEXCEPT {
     EKCalendar *defaultCalendar = [eventStore defaultCalendarForNewEvents];
     if (!defaultCalendar) {
-        NSLog(@"未找到默认日历");
-        logBuffer->append(GET_CURRENT_TIME() + "\t未找到默认日历程序 ------> 程序退出.\n");
+        NSLog(@"The default calendar program was not found! The GetSchedual program exits");
+        logBuffer->append(GET_CURRENT_TIME() + "\t未找到默认日历程序！GetSchedual程序退出.The default calendar program was not found! The GetSchedual program exits.\n");
         dispatch_semaphore_signal(semaphore);
         return;
     }
@@ -86,15 +84,17 @@ void Schedual::addEventToCalendarWithStore(EKEventStore *eventStore, dispatch_se
     event.calendar = defaultCalendar;
     if (m_eventEndDate == nil) {
         event.allDay = YES;
+        logBuffer->append("GerSchedual : 将事件设置为全天！Set the event to the whole day!");
     }
     else
     {
         event.allDay = NO;
+        logBuffer->append("GerSchedual : 将事件设置为非全天!Set the event to non-full day!");
     }
 
     if (!event.startDate || !event.endDate) {
         NSLog(@"日程开始或结束日期无效，无法保存事件");
-        logBuffer->append(GET_CURRENT_TIME() + "\t日程开始或结束日期无效，无法保存事件 ------> 程序退出.\n");
+        logBuffer->append(GET_CURRENT_TIME() + "\t日程开始或结束日期无效，无法保存事件程序退出.The event could not be saved, and the program exited.\n");
         dispatch_semaphore_signal(semaphore);
         return;
     }
@@ -106,11 +106,11 @@ void Schedual::addEventToCalendarWithStore(EKEventStore *eventStore, dispatch_se
     
     NSError *saveError = nil;
     if ([eventStore saveEvent:event span:EKSpanThisEvent commit:YES error:&saveError]) {
-        NSLog(@"日程事件保存成功，事件标识符: %@", event.eventIdentifier);
-        logBuffer->append(GET_CURRENT_TIME() + "\t日程事件保存成功，事件标识符：" + [event.eventIdentifier UTF8String] +"\n");
+        NSLog(@"The event is saved successfully, and the event identifier is: %@", event.eventIdentifier);
+        logBuffer->append(GET_CURRENT_TIME() + "\tThe event is saved successfully, and the event identifier is:" + [event.eventIdentifier UTF8String] +"\n");
     } else {
-        NSLog(@"日程事件保存失败，错误信息: %@", saveError.localizedDescription);
-        logBuffer->append(GET_CURRENT_TIME() + "\t日程事件保存成功，事件标识符：" + [saveError.localizedDescription UTF8String] + "\n");
+        NSLog(@"Failed to save the event with the following error message: %@", saveError.localizedDescription);
+        logBuffer->append(GET_CURRENT_TIME() + "\tFailed to save the event with the following error message:：" + [saveError.localizedDescription UTF8String] + "\n");
     }
     dispatch_semaphore_signal(semaphore);
 }
@@ -122,15 +122,14 @@ void Schedual::addEventToCalendar() noexcept {
     EKEventStore *eventStore = [[EKEventStore alloc] init];
     dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
     EKAuthorizationStatus status = [EKEventStore authorizationStatusForEntityType:EKEntityTypeEvent];
-
     auto handleAuthorization = [this, eventStore, semaphore](BOOL granted, NSError *error) {
         if (granted) {
             addEventToCalendarWithStore(eventStore, semaphore);
         } else {
-            NSLog(@"日历访问权限被拒绝，错误信息: %@", error ? error.localizedDescription : @"无具体错误信息");
-            logBuffer->append(GET_CURRENT_TIME() + "\t日志访问权限被拒绝，错误星系：" + [error.localizedDescription UTF8String] + "\n");
-            dispatch_semaphore_signal(semaphore);
+            NSLog(@"Calendar access denied with error message: %@", error ? error.localizedDescription : @"无具体错误信息");
+            logBuffer->append(GET_CURRENT_TIME() + "\tCalendar access denied with error message:：" + [error.localizedDescription UTF8String] + "\n");
         }
+        dispatch_semaphore_signal(semaphore);
     };
     
     if (@available(iOS 17.0, macOS 14.0, *)) {
@@ -147,8 +146,8 @@ void Schedual::addEventToCalendar() noexcept {
         } else if (status == EKAuthorizationStatusNotDetermined) {
             [eventStore requestAccessToEntityType:EKEntityTypeEvent completion:handleAuthorization];
         } else {
-            NSLog(@"日历访问权限已被拒绝，请在系统设置中更改权限。");
-            logBuffer->append(GET_CURRENT_TIME() + "\t日历访问权限已被拒绝，请在系统设置中更改权限.\n");
+            NSLog(@"Calendar access has been denied, please change the permission in the system settings.");
+            logBuffer->append(GET_CURRENT_TIME() + "\tCalendar access has been denied, please change the permission in the system settings.\n");
             dispatch_semaphore_signal(semaphore);
         }
 #pragma clang diagnostic pop

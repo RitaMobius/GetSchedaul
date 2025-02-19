@@ -10,10 +10,6 @@
  *
  */
 
-
-
-
-
 #include <iostream>
 #include <thread>
 #include <mutex>
@@ -45,17 +41,19 @@ std::atomic<bool> stopThreadPool(false);
 int main(int argc, const char * argv[]) {
 
     @autoreleasepool {
+        std::ios::sync_with_stdio(false);
+        std::cin.tie(nullptr);
         std::string filename;
         try {
-            boost::program_options::options_description commandLineProcessing("GetSchedual帮助文档");
-            commandLineProcessing.add_options()	
+            boost::program_options::options_description commandLineProcessing("GetSchedual帮助文档：");
+            commandLineProcessing.add_options()
             (SCHEDUAL_COMMAND_HELP, "获取帮助信息")
             (SCHEDUAL_COMMAND_VERSION, "获取GetSchedual版本信息")
-            (SCHEDUAL_COMMAND_TITLE, boost::program_options::value<std::string>(), "设置日程信息的标题")
-            (SCHEDUAL_COMMAND_START, boost::program_options::value<std::string>(), "设置日程的开始时间")
-            (SCHEDUAL_COMMAND_END, boost::program_options::value<std::string>(), "设置日程的结束时间")
-            (SCHEDUAL_COMMAND_LOCATE, boost::program_options::value<std::string>(), "设置日程的发生地")
-            (SCHEDUAL_COMMAND_DEADLINE,boost::program_options::value<std::string>(), "设置日程的截止时间")
+            (SCHEDUAL_COMMAND_TITLE, boost::program_options::value<std::string>(), "设置日程信息的标题:      -t \"日程名称\"")
+            (SCHEDUAL_COMMAND_START, boost::program_options::value<std::string>(), "设置日程的开始时间:       -s \"2077-01-01\"")
+            (SCHEDUAL_COMMAND_END, boost::program_options::value<std::string>(), "设置日程的结束时间：        -e \"2077-01-01\"")
+            (SCHEDUAL_COMMAND_LOCATE, boost::program_options::value<std::string>(), "设置日程的发生地:       -l \"日程地址\"")
+            (SCHEDUAL_COMMAND_DEADLINE,boost::program_options::value<std::string>(), "设置日程的截止时间：    -d 1")
             (SCHEDUAL_COMMAND_FILE, boost::program_options::value<std::string>(&filename), "指定要处理的Json文件");
             
             boost::program_options::variables_map parameterOption;
@@ -90,97 +88,6 @@ int main(int argc, const char * argv[]) {
                     return EXIT_SUCCESS;
                 }
             }
-            /*File参数不能与其他参数一起使用*/
-            if (parameterOption.contains(SCHEDUAL_COMMAND_F_ )) {
-                if (parameterOption.contains(SCHEDUAL_COMMAND_V_) || parameterOption.contains(SCHEDUAL_COMMAND_T_) || parameterOption.contains(SCHEDUAL_COMMAND_S_) || parameterOption.contains(SCHEDUAL_COMMAND_E_) || parameterOption.contains(SCHEDUAL_COMMAND_L_) || parameterOption.contains(SCHEDUAL_COMMAND_D_) || parameterOption.contains(SCHEDUAL_COMMAND_H_)) {
-                    std::cerr << "Option -f,--file must be used alone." << std::endl;
-                    return EXIT_SUCCESS;
-                }
-                
-                const std::regex pattern(R"([a-zA-Z]+\.[a-zA-Z]+)");
-                std::vector<std::string>  featureKey;
-                
-                schedual::Json getJson(filename);
-                const boost::json::value jsonValue = boost::json::parse(getJson.getJsonFileContents());
-                getJson.sortJsonToSchedualMap(jsonValue);
-                std::unordered_map<std::string, boost::json::value> hashTable = getJson.getSchedualMap();
-                
-                for (auto &[fst, snd] : hashTable) {
-                    if (std::regex_match(fst, pattern)) {
-                        featureKey.emplace_back(fst);
-                    }
-                }
-                
-                // 分组
-                const std::vector<std::vector<std::string>> resul = Multithreaded::ThreadedTasks::splitIntoNGroups(std::move(featureKey),NUMBER_OF_THREADS);
-                if (resul.empty()) {
-                    /*这里为空的原因，用户配置Json文件错误找不到对应的字符串，要么文件为空*/
-                    return EXIT_SUCCESS;
-                }
-                std::unordered_map<std::string, int> jsonValueCapacity = getJson.getValueCapacity();
-                SCHEDUAL_CONSTEXPR int numThreads = NUMBER_OF_THREADS;
-                std::vector<std::thread> threads;
-
-                threads.reserve(numThreads);
-                for (int i = 0; i < numThreads; ++i) {
-                    threads.emplace_back(Multithreaded::ThreadPools::schedualWorkerThread);
-                }
-                if(!resul[0].empty()) {
-                    Multithreaded::ThreadPools::addExecutionTask([&hashTable,&jsonValueCapacity,&resul](const std::function<void()> &func) {
-                        Multithreaded::ThreadedTasks::executeWriteScheduleTask(resul[0], hashTable,jsonValueCapacity);
-                        func();
-                    });
-                }
-                if (!resul[1].empty()) {
-                    Multithreaded::ThreadPools::addExecutionTask([&hashTable,&jsonValueCapacity,&resul](const std::function<void()> &func) {
-                        Multithreaded::ThreadedTasks::executeWriteScheduleTask(resul[1], hashTable, jsonValueCapacity);
-                        func();
-                    });
-                }
-                if (!resul[2].empty()) {
-                    Multithreaded::ThreadPools::addExecutionTask([&hashTable,&jsonValueCapacity,&resul](const std::function<void()> &func) {
-                        Multithreaded::ThreadedTasks::executeWriteScheduleTask(resul[2], hashTable, jsonValueCapacity);
-                        func();
-                    });
-                }
-                if (!resul[3].empty()) {
-                    Multithreaded::ThreadPools::addExecutionTask([&hashTable,&jsonValueCapacity,&resul](const std::function<void()> &func) {
-                        Multithreaded::ThreadedTasks::executeWriteScheduleTask(resul[3], hashTable, jsonValueCapacity);
-                        func();
-                    });
-                }
-                if (!resul[4].empty()) {
-                    Multithreaded::ThreadPools::addExecutionTask([&hashTable,&jsonValueCapacity,&resul](const std::function<void()> &func) {
-                        Multithreaded::ThreadedTasks::executeWriteScheduleTask(resul[4], hashTable, jsonValueCapacity);
-                        func();
-                    });
-                }
-                
-                if (!resul[5].empty()) {
-                    Multithreaded::ThreadPools::addExecutionTask([&hashTable,&jsonValueCapacity,&resul](const std::function<void()> &func) {
-                        Multithreaded::ThreadedTasks::executeWriteScheduleTask(resul[5], hashTable, jsonValueCapacity);
-                        func();
-                    });
-                }
-                if (!resul[6].empty()) {
-                    Multithreaded::ThreadPools::addExecutionTask([&hashTable,&jsonValueCapacity,&resul](const std::function<void()> &func) {
-                        Multithreaded::ThreadedTasks::executeWriteScheduleTask(resul[6], hashTable, jsonValueCapacity);
-                        func();
-                    });
-                }
-                Multithreaded::ThreadPools::stopPool();
-
-                for (auto& thread : threads) {
-                    if (thread.joinable()) {
-                        thread.join();
-                    }
-                }
-            } else {
-                /*修改这里的错误提示，2025/2/19*/
-                std::cerr << "未提供 -f 选项和文件名称。使用 -h 获取帮助。" << std::endl;
-                return EXIT_SUCCESS;
-            }
-            
             
             /*参数-t、-s必须同时使用，设置日程的标题、开始时间*/
             if (parameterOption.contains(SCHEDUAL_COMMAND_T_) || parameterOption.contains(SCHEDUAL_COMMAND_S_)) {
@@ -194,7 +101,6 @@ int main(int argc, const char * argv[]) {
                 event.eventStartDate = parameterOption[SCHEDUAL_COMMAND_S_].as<std::string>();
                 NSString *nsStrTile = [[NSString alloc] initWithUTF8String:event.eventTile.c_str()];
                 NSString *nsStrStartDate = [[NSString alloc] initWithUTF8String:event.eventStartDate.c_str()];
-                
                 NSString *nsStrEndDate = nil;
                 NSString *nsStrLocation = nil;
                 NSString *nsStrDeadLine = nil;
@@ -217,9 +123,108 @@ int main(int argc, const char * argv[]) {
                 }
                 SetSchedual::Schedual targetSchedual(nsStrTile,nsStrStartDate,nsStrEndDate,nsStrLocation,nsStrDeadLine);
                 targetSchedual.addEventToCalendar(); // 写入
+                return EXIT_SUCCESS;
             }
-            
-            
+            /*File参数不能与其他参数一起使用*/
+            if (parameterOption.contains(SCHEDUAL_COMMAND_F_ )) {
+                if (parameterOption.contains(SCHEDUAL_COMMAND_V_) || parameterOption.contains(SCHEDUAL_COMMAND_T_) || parameterOption.contains(SCHEDUAL_COMMAND_S_) || parameterOption.contains(SCHEDUAL_COMMAND_E_) || parameterOption.contains(SCHEDUAL_COMMAND_L_) || parameterOption.contains(SCHEDUAL_COMMAND_D_) || parameterOption.contains(SCHEDUAL_COMMAND_H_)) {
+                    std::cerr << "Option -f,--file must be used alone." << std::endl;
+                    return EXIT_SUCCESS;
+                }
+                
+                const std::regex pattern(R"([a-zA-Z]+\.[a-zA-Z]+)");  // 正则表达式匹配正确
+                std::vector<std::string>  featureKey;
+                
+                schedual::Json getJson(filename);
+                const boost::json::value jsonValue = boost::json::parse(getJson.getJsonFileContents());
+                getJson.sortJsonToSchedualMap(jsonValue);
+                std::unordered_map<std::string, boost::json::value> hashTable = getJson.getSchedualMap();
+                
+                for (auto &[fst, snd] : hashTable) {
+                    if (std::regex_match(fst, pattern)) {
+                        featureKey.emplace_back(fst);
+                    }
+                }
+                
+//                for(auto &i :featureKey) {
+//                    std::cout << i << std::endl;
+//                }  测试语句可以正确输出值的特征
+                
+                // 分组
+                const std::vector<std::vector<std::string>> resul = Multithreaded::ThreadedTasks::splitIntoNGroups(featureKey,NUMBER_OF_THREADS);
+                if (resul.empty()) {
+                    /*这里为空的原因，用户配置Json文件错误找不到对应的字符串，要么文件为空*/
+                    return EXIT_SUCCESS;
+                }
+                std::unordered_map<std::string, int> jsonValueCapacity = getJson.getValueCapacity();
+                SCHEDUAL_CONSTEXPR int numThreads = NUMBER_OF_THREADS;
+                std::vector<std::thread> threads;
+
+                threads.reserve(numThreads);
+                for (int i = 0; i < numThreads; ++i) {
+                    threads.emplace_back(Multithreaded::ThreadPools::schedualWorkerThread);
+                }
+                
+                if(!resul[0].empty()) {
+                    Multithreaded::ThreadPools::addExecutionTask([&hashTable,&jsonValueCapacity,&resul](const std::function<void()> &func) {
+                        Multithreaded::ThreadedTasks::executeWriteScheduleTask(resul[0], hashTable,jsonValueCapacity);
+                        func();
+                        std::cout << "The threaded task is completed!" << std::this_thread::get_id() << "\n";
+                    });
+                }
+                if (!resul[1].empty()) {
+                    Multithreaded::ThreadPools::addExecutionTask([&hashTable,&jsonValueCapacity,&resul](const std::function<void()> &func) {
+                        Multithreaded::ThreadedTasks::executeWriteScheduleTask(resul[1], hashTable, jsonValueCapacity);
+                        func();
+                        std::cout << "The threaded task is completed!" << std::this_thread::get_id() << "\n";
+                    });
+                }
+                if (!resul[2].empty()) {
+                    Multithreaded::ThreadPools::addExecutionTask([&hashTable,&jsonValueCapacity,&resul](const std::function<void()> &func) {
+                        Multithreaded::ThreadedTasks::executeWriteScheduleTask(resul[2], hashTable, jsonValueCapacity);
+                        func();
+                        std::cout << "The threaded task is completed!" << std::this_thread::get_id() << "\n";
+                    });
+                }
+                if (!resul[3].empty()) {
+                    Multithreaded::ThreadPools::addExecutionTask([&hashTable,&jsonValueCapacity,&resul](const std::function<void()> &func) {
+                        Multithreaded::ThreadedTasks::executeWriteScheduleTask(resul[3], hashTable, jsonValueCapacity);
+                        func();
+                        std::cout << "The threaded task is completed!" << std::this_thread::get_id() << "\n";
+                    });
+                }
+                if (!resul[4].empty()) {
+                    Multithreaded::ThreadPools::addExecutionTask([&hashTable,&jsonValueCapacity,&resul](const std::function<void()> &func) {
+                        Multithreaded::ThreadedTasks::executeWriteScheduleTask(resul[4], hashTable, jsonValueCapacity);
+                        func();
+                        std::cout << "The threaded task is completed!" << std::this_thread::get_id() << "\n";
+                    });
+                }
+                
+                if (!resul[5].empty()) {
+                    Multithreaded::ThreadPools::addExecutionTask([&hashTable,&jsonValueCapacity,&resul](const std::function<void()> &func) {
+                        Multithreaded::ThreadedTasks::executeWriteScheduleTask(resul[5], hashTable, jsonValueCapacity);
+                        func();
+                        std::cout << "The threaded task is completed!" << std::this_thread::get_id() << "\n";
+                    });
+                }
+                if (!resul[6].empty()) {
+                    Multithreaded::ThreadPools::addExecutionTask([&hashTable,&jsonValueCapacity,&resul](const std::function<void()> &func) {
+                        Multithreaded::ThreadedTasks::executeWriteScheduleTask(resul[6], hashTable, jsonValueCapacity);
+                        func();
+                        std::cout << "The threaded task is completed!" << std::this_thread::get_id() << "\n";
+                    });
+                }
+                std::cout << "When the task is processed, wait for the thread to close... ...\n";
+                Multithreaded::ThreadPools::stopPool();
+                for (auto& thread : threads) {
+                    if (thread.joinable()) {
+                        thread.join();
+                    }
+                }
+                std::cout << GET_CURRENT_TIME() << "\tThe thread is closed!\n";
+                std::cout.flush();
+            }
         } catch (const std::exception& e) {
             /*修改这里的错误信息*/
             std::cerr << "错误: " << e.what() << std::endl;
