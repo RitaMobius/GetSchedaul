@@ -66,8 +66,8 @@ int main(int argc, const char * argv[]) {
                     std::cerr << "Option -h,--help must be used alone." << std::endl;
                     return EXIT_SUCCESS;
                 }
-                std::cout << commandLineProcessing << std::endl;
                 std::ostringstream oss;
+                oss << commandLineProcessing << std::endl;
                 for (const auto &commandOptions: commandLineProcessing.options()) {
                     std::string letterCommandOtion, getSchedualCommandOptionStr;;
                     std::string descriptionInformation = commandOptions->description();
@@ -86,7 +86,7 @@ int main(int argc, const char * argv[]) {
                         oss << std::string(35, ' ') << line << std::endl;
                     }
                 }
-                std::cout << oss.str();
+                std::cout << oss.str() << std::endl;
                 return EXIT_SUCCESS;
             }
             
