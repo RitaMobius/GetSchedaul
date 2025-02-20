@@ -64,6 +64,10 @@
     #define JSON_FILE_EMPTY_ERROR_CODE "00"
 #endif // JSON_FILE_EMPTY_ERROR_CODE
 
+#ifndef EXIT_ERROR
+    #define EXIT_ERROR -1
+#endif // EXIT_ERROR
+
 #ifndef JSON_FILE_OPEN_ERROR
     #define JSON_FILE_OPEN_ERROR
 #endif // JSON_FILE_OPEN_ERROR

@@ -16,7 +16,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "F36EB9EA2D5F31A300313D36"
-               BuildableName = "objectiveoop"
+               BuildableName = "GetSchedual"
                BlueprintName = "objectiveoop"
                ReferencedContainer = "container:objectiveoop.xcodeproj">
             </BuildableReference>
@@ -46,7 +46,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "F36EB9EA2D5F31A300313D36"
-            BuildableName = "objectiveoop"
+            BuildableName = "GetSchedual"
             BlueprintName = "objectiveoop"
             ReferencedContainer = "container:objectiveoop.xcodeproj">
          </BuildableReference>
@@ -63,7 +63,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "F36EB9EA2D5F31A300313D36"
-            BuildableName = "objectiveoop"
+            BuildableName = "GetSchedual"
             BlueprintName = "objectiveoop"
             ReferencedContainer = "container:objectiveoop.xcodeproj">
          </BuildableReference>

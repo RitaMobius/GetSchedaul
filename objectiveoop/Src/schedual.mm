@@ -44,7 +44,9 @@ m_eventLocation(eventLocation), m_interval(1), m_deadline(deadline), deadlineEmp
           }
     eventStartDate_ = convertStringToDate(m_eventStartDate, @"yyyy-MM-dd HH:mm");
     if (m_eventEndDate == nil) {
-        eventEndDate_ = [eventStartDate_ dateByAddingTimeInterval:24 * 60 * 60];
+        NSRange range = NSMakeRange(0, 10);
+        m_eventStartDate = [m_eventStartDate substringWithRange:range];
+        eventEndDate_ = convertStringToDate(m_eventStartDate, @"yyyy-MM-dd");
     }
     else {
         eventEndDate_ = convertStringToDate(m_eventEndDate, @"yyyy-MM-dd HH:mm");
