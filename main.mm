@@ -49,11 +49,11 @@ int main(int argc, const char * argv[]) {
             commandLineProcessing.add_options()
             (SCHEDUAL_COMMAND_HELP, "获取帮助信息")
             (SCHEDUAL_COMMAND_VERSION, "获取GetSchedual版本信息")
-            (SCHEDUAL_COMMAND_TITLE, boost::program_options::value<std::string>(), "设置日程信息的标题:      -t \"日程名称\"")
-            (SCHEDUAL_COMMAND_START, boost::program_options::value<std::string>(), "设置日程的开始时间:       -s \"2077-01-01\"")
-            (SCHEDUAL_COMMAND_END, boost::program_options::value<std::string>(), "设置日程的结束时间：        -e \"2077-01-01\"")
-            (SCHEDUAL_COMMAND_LOCATE, boost::program_options::value<std::string>(), "设置日程的发生地:       -l \"日程地址\"")
-            (SCHEDUAL_COMMAND_DEADLINE,boost::program_options::value<std::string>(), "设置日程的截止时间：    -d 1")
+            (SCHEDUAL_COMMAND_TITLE, boost::program_options::value<std::string>(), "设置日程信息的标题")
+            (SCHEDUAL_COMMAND_START, boost::program_options::value<std::string>(), "设置日程的开始时间")
+            (SCHEDUAL_COMMAND_END, boost::program_options::value<std::string>(), "设置日程的结束时间")
+            (SCHEDUAL_COMMAND_LOCATE, boost::program_options::value<std::string>(), "设置日程的发生地")
+            (SCHEDUAL_COMMAND_DEADLINE,boost::program_options::value<std::string>(), "设置日程的截止时间")
             (SCHEDUAL_COMMAND_FILE, boost::program_options::value<std::string>(&filename), "指定要处理的Json文件");
             
             boost::program_options::variables_map parameterOption;
@@ -66,7 +66,28 @@ int main(int argc, const char * argv[]) {
                     std::cerr << "Option -h,--help must be used alone." << std::endl;
                     return EXIT_SUCCESS;
                 }
-                std::cout << commandLineProcessing << std::endl;
+                std::ostringstream oss;
+                oss << "Command-line Arguments：" << std::endl;
+                for (const auto &commandOptions: commandLineProcessing.options()) {
+                    std::string letterCommandOtion, getSchedualCommandOptionStr;;
+                    std::string descriptionInformation = commandOptions->description();
+                    letterCommandOtion.append(commandOptions->canonical_display_name(1));
+
+                    if (!letterCommandOtion.empty()) {
+                        getSchedualCommandOptionStr.append(letterCommandOtion + "  ");
+                    } else if (!letterCommandOtion.empty()) {
+                        getSchedualCommandOptionStr = letterCommandOtion;
+                    }
+                    std::istringstream descriptionInformationStr(descriptionInformation);
+                    std::string line;
+                    std::getline(descriptionInformationStr, line);
+                    oss.width(30);
+                    oss << std::left << getSchedualCommandOptionStr << " = " << line << std::endl;
+                    while (std::getline(descriptionInformationStr, line)) {
+                        oss << std::string(34, ' ') << line << std::endl;
+                    }
+                }
+                std::cout << oss.str();
                 return EXIT_SUCCESS;
             }
             
