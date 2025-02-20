@@ -66,13 +66,12 @@ int main(int argc, const char * argv[]) {
                     std::cerr << "Option -h,--help must be used alone." << std::endl;
                     return EXIT_SUCCESS;
                 }
+                std::cout << commandLineProcessing << std::endl;
                 std::ostringstream oss;
-                oss << "Command-line Arguments：" << std::endl;
                 for (const auto &commandOptions: commandLineProcessing.options()) {
                     std::string letterCommandOtion, getSchedualCommandOptionStr;;
                     std::string descriptionInformation = commandOptions->description();
                     letterCommandOtion.append(commandOptions->canonical_display_name(1));
-
                     if (!letterCommandOtion.empty()) {
                         getSchedualCommandOptionStr.append(letterCommandOtion + "  ");
                     } else if (!letterCommandOtion.empty()) {
@@ -81,10 +80,10 @@ int main(int argc, const char * argv[]) {
                     std::istringstream descriptionInformationStr(descriptionInformation);
                     std::string line;
                     std::getline(descriptionInformationStr, line);
-                    oss.width(30);
+                    oss.width(35);
                     oss << std::left << getSchedualCommandOptionStr << " = " << line << std::endl;
                     while (std::getline(descriptionInformationStr, line)) {
-                        oss << std::string(34, ' ') << line << std::endl;
+                        oss << std::string(35, ' ') << line << std::endl;
                     }
                 }
                 std::cout << oss.str();
