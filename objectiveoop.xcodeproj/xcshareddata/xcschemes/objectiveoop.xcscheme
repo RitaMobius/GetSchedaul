@@ -43,7 +43,7 @@
       viewDebuggingEnabled = "No">
       <PathRunnable
          runnableDebuggingMode = "0"
-         FilePath = "/Users/dengjizhang/Library/Developer/Xcode/DerivedData/objectiveoop-barirliaeuqzgfgdsdjofmullgzc/Build/Products/Debug/objectiveoop">
+         FilePath = "/Library/Developer/Xcode/DerivedData/objectiveoop-barirliaeuqzgfgdsdjofmullgzc/Build/Products/Debug/objectiveoop">
       </PathRunnable>
       <MacroExpansion>
          <BuildableReference
