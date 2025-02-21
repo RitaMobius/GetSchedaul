@@ -26,7 +26,10 @@ void Multithreaded::ThreadedTasks::executeWriteScheduleTask(const std::vector<st
     int capacity = 0, deadLineStrtoi = 0;
     std::string eventDate, hashTableKey;
     schedualInformation_Struct event = {};
-    const std::regex pattern("^[+-]?\\d+$"), patternTime(R"(\d{4}-\d{2}-\d{2} \d{1,2}:\d{2})");  // 纯数字规则
+    bool periodicRuleStatus = false;
+    const std::regex pattern("^[+-]?\\d+$"), patternTime(R"(\d{4}-\d{2}-\d{2} \d{1,2}:\d{2})"),patternCycle(R"(\d+-\d+)"),patternCycleRules(R"(\d+-\d+(,\d+-\d+)*)");
+    
+    std::vector<std::string> cycleRules;
      for (const auto & i : singleDayCourseInformation) {
              hashTableKey = i;
              capacity = ValueCapacity[hashTableKey];
@@ -86,6 +89,18 @@ void Multithreaded::ThreadedTasks::executeWriteScheduleTask(const std::vector<st
                                  if (std::regex_match(scheduleInformation[scheduleInformationIndex], pattern)) {
                                      event.deadline = scheduleInformation[scheduleInformationIndex];
                                  }
+                                 else if (std::regex_match(scheduleInformation[scheduleInformationIndex],patternCycleRules)) {
+                                     /**匹配到6-9,10-11形式的字符串并提取**/
+                                     periodicRuleStatus = true;
+                                     auto strBegin = std::sregex_iterator(scheduleInformation[scheduleInformationIndex].begin(), scheduleInformation[scheduleInformationIndex].end(), patternCycle);
+                                     auto strEnd = std::sregex_iterator();
+                                     for (std::sregex_iterator i = strBegin; i != strEnd; ++i) {
+                                         std::smatch match = *i;
+                                         /**将匹配的6-7，9-10类型的字符串中，每一组数都存到容器中**/
+                                         cycleRules.emplace_back(match.str());
+                                         
+                                     }
+                                 }
                                  else if (scheduleInformation[scheduleInformationIndex] == "null") {
                                      event.deadline = scheduleInformation[scheduleInformationIndex];
                                  }
@@ -113,43 +128,106 @@ void Multithreaded::ThreadedTasks::executeWriteScheduleTask(const std::vector<st
                              break;
                      }
                  }
-                 if (event.deadline != "null") {
-                     try {
-                         deadLineStrtoi = std::stoi(event.deadline);
-                     } catch (const std::invalid_argument& e) {
-                         /**两种情况这里会报错，其一是传过来的event.deadline它不是字符串，也就是说在配置Json文件的时候，代表结束日期的部分直接使用数字**/
-                         std::cerr << "GetSchedual 报错：Json文件中日期格式配置错误！" << std::endl;
-                         exit(EXIT_ERROR);
-                     }
-                     
-                 }
+                 
                  
                  std::string startDate = event.eventStartDate;
                  /*从事件开始事件2024-10-10 8:30截取前10个字符得到日期2024-10-10*/
                  startDate.substr(0,10);
-                 /*通过事件开始事件计算出事件截止时间*/
-                 std::string deadLine = SetSchedual::Schedual::calculateDateAfterWeeks(startDate, deadLineStrtoi);
-                 
-                 NSString *nsStrTile = [[NSString alloc] initWithUTF8String:event.eventTile.c_str()];
-                 NSString *nsStrStartDate = [[NSString alloc] initWithUTF8String:event.eventStartDate.c_str()];
-                 
-                 NSString *nsStrEndDate = nil;
-                 NSString *nsStrLocation = nil;
-                 NSString *nsStrDeadLine = nil;
-                 
-                 if (event.eventEndDate != "null") {
-                     nsStrEndDate = [[NSString alloc] initWithUTF8String:event.eventEndDate.c_str()];
-                 }
-                 if (event.eventLocation != "null") {
-                     nsStrLocation = [[NSString alloc] initWithUTF8String:event.eventLocation.c_str()];
-                 }
-                 if (event.deadline != "null") {
-                     nsStrDeadLine = [[NSString alloc] initWithUTF8String:deadLine.c_str()];
-                 }
+                 std::string deadLine;
+                 /**如果用户设置的规则为3-4，6-7，8-9这样的规则**/
+                 if (periodicRuleStatus) {
+                     /**根据第一周的时间去计算开始时间和结束时间**/
+                     std::string startTime, endTime;
+                     std::regex patternNumber(R"((\d+)-(\d+))"),patternT(R"(\d{2}:\d{2})");
+                     std::smatch match;
+                     if (std::regex_search(event.eventStartDate, match, patternT)) {
+                         startTime =  match.str();
+                     }
+                     if (std::regex_search(event.eventEndDate, match, patternT)) {
+                         endTime =  match.str();
+                     }
+                     int startDateStrtoi = 0,endDateStrtoi = 0;
+                     for (const auto &cycle : cycleRules) {
+                         if (std::regex_search(cycle, match, patternNumber)) {
+                             try {
+                                 startDateStrtoi = std::stoi(match[1].str()) - 1;
+                                 endDateStrtoi = std::stoi(match[2].str()) - startDateStrtoi;
+                                 if (startDateStrtoi < 0 || endDateStrtoi < 0) {
+                                     std::cerr << "GetSchedaul：日期范围配置错误！The date range is misconfigured！" << std::endl;
+                                     exit(EXIT_ERROR);
+                                 }
+                                 event.eventStartDate = SetSchedual::Schedual::calculateDateAfterWeeks(startDate, startDateStrtoi);
+                                 event.eventEndDate = SetSchedual::Schedual::calculateDateAfterWeeks(startDate, startDateStrtoi);
+                                 event.eventStartDate.append(" " + startTime);
+                                 event.eventEndDate.append(" " + endTime);
+                                 
+                                 deadLine = SetSchedual::Schedual::calculateDateAfterWeeks(event.eventStartDate, endDateStrtoi);
+                            
+                                 NSString *nsStrTile = [[NSString alloc] initWithUTF8String:event.eventTile.c_str()];
+                                 NSString *nsStrStartDate = [[NSString alloc] initWithUTF8String:event.eventStartDate.c_str()];
+                                 
+                                 NSString *nsStrEndDate = nil;
+                                 NSString *nsStrLocation = nil;
+                                 NSString *nsStrDeadLine = nil;
+                                 
+                                 if (event.eventEndDate != "null") {
+                                     nsStrEndDate = [[NSString alloc] initWithUTF8String:event.eventEndDate.c_str()];
+                                 }
+                                 if (event.eventLocation != "null") {
+                                     nsStrLocation = [[NSString alloc] initWithUTF8String:event.eventLocation.c_str()];
+                                 }
+                                 if (event.deadline != "null") {
+                                     nsStrDeadLine = [[NSString alloc] initWithUTF8String:deadLine.c_str()];
+                                 }
 
-                 SetSchedual::Schedual targetSchedual(nsStrTile,nsStrStartDate,nsStrEndDate,nsStrLocation,nsStrDeadLine);
-                 targetSchedual.addEventToCalendar();
+                                 SetSchedual::Schedual targetSchedual(nsStrTile,nsStrStartDate,nsStrEndDate,nsStrLocation,nsStrDeadLine);
+                                 targetSchedual.addEventToCalendar();
+                                 
+                             } catch (const std::invalid_argument& e) {
+                                 std::cerr << "GetSchedual 报错：Json文件中日期格式配置错误！" << std::endl;
+                                 exit(EXIT_ERROR);
+                             }
+                         } else {
+                             std::cout << "未找到匹配结果。" << std::endl;
+                         }
+                     }
+                     
+                 }
+                 else {
+                     if (event.deadline != "null") {
+                         try {
+                             deadLineStrtoi = std::stoi(event.deadline);
+                         } catch (const std::invalid_argument& e) {
+                             std::cerr << "GetSchedual 报错：Json文件中日期格式配置错误！" << std::endl;
+                             exit(EXIT_ERROR);
+                         }
+                         
+                     }
+                     /*通过事件开始事件计算出事件截止时间*/
+                     deadLine = SetSchedual::Schedual::calculateDateAfterWeeks(startDate, deadLineStrtoi);
+                     NSString *nsStrTile = [[NSString alloc] initWithUTF8String:event.eventTile.c_str()];
+                     NSString *nsStrStartDate = [[NSString alloc] initWithUTF8String:event.eventStartDate.c_str()];
+                     
+                     NSString *nsStrEndDate = nil;
+                     NSString *nsStrLocation = nil;
+                     NSString *nsStrDeadLine = nil;
+                     
+                     if (event.eventEndDate != "null") {
+                         nsStrEndDate = [[NSString alloc] initWithUTF8String:event.eventEndDate.c_str()];
+                     }
+                     if (event.eventLocation != "null") {
+                         nsStrLocation = [[NSString alloc] initWithUTF8String:event.eventLocation.c_str()];
+                     }
+                     if (event.deadline != "null") {
+                         nsStrDeadLine = [[NSString alloc] initWithUTF8String:deadLine.c_str()];
+                     }
+
+                     SetSchedual::Schedual targetSchedual(nsStrTile,nsStrStartDate,nsStrEndDate,nsStrLocation,nsStrDeadLine);
+                     targetSchedual.addEventToCalendar();
+                 }
+                 
                  scheduleInformation.clear();
+                 cycleRules.clear();
          }
      }
 }
