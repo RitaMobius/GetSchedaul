@@ -92,9 +92,9 @@ void Multithreaded::ThreadedTasks::executeWriteScheduleTask(const std::vector<st
                                  else if (std::regex_match(scheduleInformation[scheduleInformationIndex],patternCycleRules)) {
                                      /**匹配到6-9,10-11形式的字符串并提取**/
                                      periodicRuleStatus = true;
-                                     auto words_begin = std::sregex_iterator(scheduleInformation[scheduleInformationIndex].begin(), scheduleInformation[scheduleInformationIndex].end(), patternCycle);
-                                     auto words_end = std::sregex_iterator();
-                                     for (std::sregex_iterator i = words_begin; i != words_end; ++i) {
+                                     auto strBegin = std::sregex_iterator(scheduleInformation[scheduleInformationIndex].begin(), scheduleInformation[scheduleInformationIndex].end(), patternCycle);
+                                     auto strEnd = std::sregex_iterator();
+                                     for (std::sregex_iterator i = strBegin; i != strEnd; ++i) {
                                          std::smatch match = *i;
                                          /**将匹配的6-7，9-10类型的字符串中，每一组数都存到容器中**/
                                          cycleRules.emplace_back(match.str());
